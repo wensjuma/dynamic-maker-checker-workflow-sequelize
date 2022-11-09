@@ -1,6 +1,7 @@
 const db = require('../models');
 const sharedResponse = require('../shared/shared.response');
 const validators = require('../validators/validate.duplicates');
+const authService = require('./auth.service');
 const bcrypt = require('bcrypt');
 // const loggerService = require("../../utils/logger.service");
 const User = db.userModel;
@@ -49,6 +50,7 @@ exports.createNewUser = async (req, res) => {
             created_by: "admin",
         }
 /**CHECK DUPLICATES IN STAGING */
+// console.log("CHECK DUPLICATES IN STAGING....''''",authService.getUserTokenDetails()['email']);
         if (await validators.isWorkflowActive('/api/workflow/create-user')) {
             insertResult = await Staging.create(stageArray).catch(err => {
                 res.status(500).send({

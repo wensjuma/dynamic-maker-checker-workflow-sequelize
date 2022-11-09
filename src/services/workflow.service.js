@@ -1,6 +1,7 @@
 const db = require('../models');
 const sharedResponse = require('../shared/shared.response');
 const validators = require('../validators/validate.duplicates');
+const authService = require('./auth.service');
 
 const Workflow = db.Workflow;
 const Role = db.Role;
@@ -26,10 +27,11 @@ exports.addWorkflow = async (req, res) => {
                 "destination_address": "/",
                 "post_data_url": "/",
                 "is_pending_approval": 0,
-                created_by: "admin", //user['username']   
+                created_by: authService.getUserTokenDetails()['email']  
             }
             let isDuplicate = (await validators.detectDuplicates(Workflow, { workflow_name: model.workflow_name }));
             if (isDuplicate) {
+                console.log("><><><>><>><><<><< WORKFLOW PAYLOAD",model);
                 createResults = await Workflow.create(model);
             } else {
                 res.send(await sharedResponse.duplicateError({ message: 'Workflow already exists!' }));
@@ -59,7 +61,7 @@ exports.addWorkflowStep = async (req, res) => {
             "is_final": item.is_final,
             "status": item.status,
             "remarks": item.remarks,
-            "created_by": "admin"
+            "created_by": authService.getUserTokenDetails['email']
         }
         let stagingObject = {
             staging_data: JSON.stringify(model),
@@ -88,6 +90,7 @@ exports.addWorkflowStep = async (req, res) => {
             }
 
         } else if (await validators.isWorkflowActive('/api/workflow/create-steps')) {
+           
             createResults = await StagingAction.create(stagingObject).catch(err => {
                 res.status(500).send({
                     message: err.message || "Some error occurred while creating the User."

@@ -33,11 +33,11 @@ app.get("/", (req, res) => {
 
 // db.sequelize.sync();
 /**If existing tables need to dropped and the database resynced */
-db.sequelize.sync({
-    // force: true 
-}).then(() => {
-    console.log("Drop and re-sync db.");
-});
+// db.sequelize.sync({
+//     // force: true 
+// }).then(() => {
+//     console.log("Drop and re-sync db.");
+// });
 require("./src/routes/router")(app);
 const PORT = (process.env.PORT) || 3100;
 app.listen(PORT, ()=>{

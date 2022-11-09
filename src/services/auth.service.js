@@ -56,7 +56,7 @@ exports.userLogin = async (req, res) => {
 
 exports.authorizeRequest = (req, res, next) => {
     // console.log(req?.headers['authorization'].split(' ')[1]);
-    console.log('AUTH TOKEN ....0000', req.headers['authorization']);
+    // console.log('AUTH TOKEN ....0000', req.headers['authorization']);
     try {
         if (!req.headers['authorization']) {
             res.status(400).json({ resp_message: "No access token provided!" });
@@ -70,7 +70,9 @@ exports.authorizeRequest = (req, res, next) => {
                     res.status(401).json({ resp_message: 'Unauthorized access, ' + err.message });
                 } else {
                     req.user = user;
-                    global.user = user;
+                    global.userDetails = user;
+                    // this.getUserTokenDetails(user);
+                    console.log(global.userDetails);
                     next();
                 }
             })
@@ -81,6 +83,10 @@ exports.authorizeRequest = (req, res, next) => {
             resp_code: '01'
         })
     }
+}
+exports.getUserTokenDetails = ()=>{
+     console.log("<<<<<<<<<>>>>>>>>>>>>>>>",token);
+     return token;
 }
 exports.resetPasswordRequest = async (req, res) => {
 

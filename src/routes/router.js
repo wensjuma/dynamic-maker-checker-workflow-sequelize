@@ -9,13 +9,13 @@ module.exports = (app) => {
     /**USER ROUTES */
     router.post("/create-user",authService.authorizeRequest, userService.createNewUser);
     router.post("/create-profile", rolesProfileService.addProfiles);
-    router.post("/create-workflow", workflowService.addWorkflow);
+    router.post("/create-workflow",authService.authorizeRequest, workflowService.addWorkflow);
     router.post("/create-workflow-step", workflowService.addWorkflowStep);
     router.post("/create-roles", rolesProfileService.addRoles);
   
     router.post("/get-profiles", rolesProfileService.getAllProfiles);
     router.post("/get-workflows", workflowService.getWorkflows);
     router.post("/get-workflow-steps", workflowService.getWorkflowSteps);
-
+    
     app.use('/api/workflow', router);
 }
