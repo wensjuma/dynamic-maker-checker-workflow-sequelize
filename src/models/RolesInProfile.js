@@ -16,6 +16,11 @@ module.exports = (sequelize, Sequelize) => {
             allowNull: false
             // unique: true
         },
+        role_name: {
+            type: Sequelize.STRING(255),
+            allowNull: true
+            // unique: true
+        },
         is_pending_approval:{
          type:Sequelize.TINYINT,
          allowNull: false

@@ -1,15 +1,17 @@
 const db = require('../models');
 const sharedResponse = require('../shared/shared.response');
 const validators = require('../validators/validate.duplicates');
+const authService = require('./auth.service');
 const Profile = db.Profile;
 const Role = db.Role;
+const RolesInProfile = db.RolesInProfile;
 exports.addProfiles = async (req, res) => {
     let createResults
     try {
         let item = req.body;
         let model = {
             profile_name: item.profile_name,
-            created_by: "admin", //user['username']
+            created_by: authService.getUserTokenDetails()['email'],
             status: item.status,
             remarks: item.description,
         }
@@ -46,7 +48,6 @@ exports.getAllProfiles = async (req, res) => {
     }
 
 };
-
 exports.getProfile = (req, res) => {
     const id = req.params.id;
 
@@ -127,32 +128,45 @@ exports.deleteAll = async (req, res) => {
             });
         });
 };
+let insertsFunc = (data, res) => {
+    RolesInProfile.create(data).then(response => {
+        res.send({
+            // data: response ? response : null,
+            resp_code: "00",
+            resp_message: "Successful"
+        })
+    }).catch((err) => {
+        res.send({
+            resp_code: "01",
+            message: err.message
+        })
+    })
+
+}
 exports.assignRoles = async (req, res) => {
     let item = req.body
+    let insertData
     try {
-        let modelInsert = item.roles.map(element => {
-            return {
-                profile_id: item.profile_id,
-                role_id: element.role_id,
-                created_by: "admin",
-                status: 1
-            }
+
+        item.roles.map(element => {
+            Role.findOne({ where: { id: element.role_id } }).then(itemD => {
+                // console.log('}{}{}{}{}{}{}{}', item);
+                insertData = {
+                    profile_id: item.profile_id,
+                    role_id: element.role_id,
+                    role_name: itemD.toJSON()['role_name'],
+                    is_pending_approval: 0,
+                    // created_by:'',// authService.getUserTokenDetails()['email'],
+                    status: 1
+                }
+                insertsFunc(insertData, res)
+            });
         })
 
-        let assignedRoles = await rolesInProfiles.bulkCreate(modelInsert)
-            .catch((err) => {
-                res.send({
-                    resp_code: "01",
-                    message: err.message
-                })
-            })
-        if (assignedRoles) {
-            console.log("assignedRoles.............", assignedRoles);
-            res.send(await sharedResponse.constructSuccessResponse())
-        }
     } catch (error) {
         res.send(await sharedResponse.constructException(error))
     }
+    // next();
 }
 exports.addRoles = async (req, res) => {
     let createResults;
@@ -182,7 +196,6 @@ exports.addRoles = async (req, res) => {
         res.send(await sharedResponse.constructException(error));
     }
 }
-
 /**UNTESTED */
 exports.assignUserProfile = async (req, res) => {
     try {
@@ -208,24 +221,15 @@ exports.assignUserProfile = async (req, res) => {
 }
 /**tests filed  */
 exports.getRolesInProfile = async (req, res) => {
-    RolesInProfile.findAll(
-        {
-            include: [
-                {
-                    model: Role,
-                    as: 'roles'
-                }
-            ]
-        }
-    ).then(data => {
-        res.send(data);
-    })
-        .catch(err => {
-            res.status(500).send({
-                message: err.message || "Some error occurred while retrieving Staffs."
-            });
+   let rolesInProfile = await RolesInProfile.findAll({where: { profile_id: req.body.profile } })
+   .catch(err => {
+        res.status(500).send({
+            message: err.message || "Some error occurred while retrieving data"
         });
+    });
+    rolesInProfile && res.send(await sharedResponse.constructSuccessResponse(rolesInProfile));
 }
+
 exports.getUsersInProfile = async (req, res) => {
     try {
         const profileId = req.body.profile_id;

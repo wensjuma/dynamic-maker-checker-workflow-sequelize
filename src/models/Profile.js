@@ -11,6 +11,11 @@ module.exports = (sequelize, Sequelize) => {
             // allowNull: false
             // unique: true
         },
+        role_id: {
+            type: Sequelize.STRING(255),
+            // allowNull: false
+            // unique: true
+        },
         soft_delete: {
             type: Sequelize.TINYINT,
             allowNull: false,
