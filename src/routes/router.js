@@ -3,6 +3,7 @@ let userService = require('../services/user.service')
 let rolesProfileService = require('../services/rolesProfiles.service')
 let workflowService = require('../services/workflow.service')
 let authService = require('../services/auth.service')
+let mainService = require('../services/main.service')
 
 module.exports = (app) => {
     router.post("/login", authService.userLogin);
@@ -13,11 +14,14 @@ module.exports = (app) => {
     router.post("/create-workflow-step", workflowService.addWorkflowStep);
     router.post("/create-roles", rolesProfileService.addRoles);
     router.post("/assign-profile-roles", rolesProfileService.assignRoles);
+    router.post("/approve-action", mainService.approvePendingAction);
   
     router.post("/get-profiles", rolesProfileService.getAllProfiles);
     router.post("/get-workflows", workflowService.getWorkflows);
     router.post("/get-workflow-steps", workflowService.getWorkflowSteps);
     router.post("/get-profile-roles", rolesProfileService.getRolesInProfile);
+
+    router.post("/get-pending-action", mainService.getPendingActions)
     
     app.use('/api/workflow', router);
 }

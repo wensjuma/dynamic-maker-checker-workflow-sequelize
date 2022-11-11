@@ -51,7 +51,7 @@ exports.createNewUser = async (req, res) => {
         }
 /**CHECK DUPLICATES IN STAGING */
 // console.log("CHECK DUPLICATES IN STAGING....''''",authService.getUserTokenDetails()['email']);
-        if (await validators.isWorkflowActive('/api/workflow/create-user')) {
+        if (!await validators.isWorkflowActive('/api/workflow/create-user')) {
             insertResult = await Staging.create(stageArray).catch(err => {
                 res.status(500).send({
                     message: err.message || "Some error occurred while creating the User."
@@ -60,7 +60,7 @@ exports.createNewUser = async (req, res) => {
             if (insertResult) {
                 res.send(await sharedResponse.constructSuccessResponse(insertResult));
             }
-        } else if (!await validators.isWorkflowActive('/api/workflow/create-user') && await validators.detectDuplicates(User, {email:userDetails['email'] })) {
+        } else if (await validators.isWorkflowActive('/api/workflow/create-user') && await validators.detectDuplicates(User, {email:userDetails['email'] })) {
             insertResult = await User.create(userDetails).catch(err => {
                 res.status(500).send({
                     message: err.message || "Some error occurred while creating the User."
