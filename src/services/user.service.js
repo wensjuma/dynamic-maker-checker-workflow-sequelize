@@ -40,18 +40,20 @@ exports.createNewUser = async (req, res) => {
             profile_id: req.body.profile_id ? req.body.profile_id : null
 
         };
-
+        let stepId = await validators.checkFinalSteps('/api/workflow/create-user');
+        console.log("{{{{{{{{{{{{{}}}}}}}}}}", stepId);
         let stageArray = {
             staging_data: JSON.stringify(userDetails),
             is_complete: false,
             is_approved: false,
             is_rejected: false,
+            step_id: stepId?.['id'],
             destination_table: 'TB_USERS',
             created_by: "admin",
         }
-/**CHECK DUPLICATES IN STAGING */
-// console.log("CHECK DUPLICATES IN STAGING....''''",authService.getUserTokenDetails()['email']);
-        if (!await validators.isWorkflowActive('/api/workflow/create-user')) {
+        /**CHECK DUPLICATES IN STAGING */
+        // console.log(".....|^^^^^|......''''", await validators.checkFinalSteps('/api/workflow/create-user'));
+        if (await validators.isWorkflowActive('/api/workflow/create-user')) {
             insertResult = await Staging.create(stageArray).catch(err => {
                 res.status(500).send({
                     message: err.message || "Some error occurred while creating the User."
@@ -60,7 +62,7 @@ exports.createNewUser = async (req, res) => {
             if (insertResult) {
                 res.send(await sharedResponse.constructSuccessResponse(insertResult));
             }
-        } else if (await validators.isWorkflowActive('/api/workflow/create-user') && await validators.detectDuplicates(User, {email:userDetails['email'] })) {
+        } else if (!await validators.isWorkflowActive('/api/workflow/create-user') && await validators.detectDuplicates(User, { email: userDetails['email'] })) {
             insertResult = await User.create(userDetails).catch(err => {
                 res.status(500).send({
                     message: err.message || "Some error occurred while creating the User."
