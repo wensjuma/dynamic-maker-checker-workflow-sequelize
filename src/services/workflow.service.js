@@ -61,7 +61,7 @@ exports.addWorkflowStep = async (req, res) => {
             "is_final": item.is_final,
             "status": item.status,
             "remarks": item.remarks,
-            "created_by": authService.getUserTokenDetails['email']
+            "created_by": authService.getUserTokenDetails['email']? authService.getUserTokenDetails['email']:'ADMIN'
         }
         let stagingObject = {
             staging_data: JSON.stringify(model),
